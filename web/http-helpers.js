@@ -14,17 +14,23 @@ var headers = {
 
 exports.serveAssets = function(res, asset, statusCode, contentType) {
   headers['Content-Type'] = contentType || 'text/html';
+  
+  if (statusCode === 404) {
+    res.writeHead(404, headers);
+    res.end(asset);
+  } else {
+    fs.readFile(asset, (err, data) => {
+      if (!err) {
+        res.writeHead(statusCode, headers);
+        res.end(data); 
+      } else {
+        console.log(err);
+        res.writeHead(401, headers);
+        res.end();
+      }
+    });
+  }
 
-  fs.readFile(asset, (err, data) => {
-    if (!err) {
-      res.writeHead(statusCode, headers);
-      res.end(data); 
-    } else {
-      console.log(err);
-      res.writeHead(401, headers);
-      res.end();
-    }
-  });
 };
 
   // Write some code here that helps serve up your static files!

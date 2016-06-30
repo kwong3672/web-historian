@@ -5,23 +5,67 @@ var qs = require('querystring');
 var httpHelpers = require('./http-helpers'); // headers and serve assets
 var archiveHelpers = require('../helpers/archive-helpers'); // path information
 var url = require('url'); // helps to parse out url to parts
-// GET
-// POST ? 
+
+// Why do we need qs, path, and url modules?
+// They do the same thing?  Parse or pull out necessary url string?
 var fs = require('fs');
 var statusCode = 200;
+var _ = require('underscore');
+
+// add content-type variable
+var contentType, fileType, contentPrefix;
+
+var dataToSend = 'initial value';
+
+// get url and parse it so we can use the values still need the url 
+var targetUrl = path.parse('???????');
+
+var types = {
+  'html': 'text',
+  'css': 'text',
+  'jpg': 'application',
+  'json': 'application',
+};
+
+var filePaths = [archive.paths.siteAssets, archive.paths.archivedSites];
+
+var doesFileExist = function(paths, route, cb) {
+  _.each(paths, (path) => {
+    fs.readdir(path, function(err, files) {
+      if (!err) {
+        console.log('route', route);
+        cb(null, _.contains(files, route.slice(1)));
+      } else {
+        cb(err);
+      }
+    });
+  });
+};
 
 var actions = {
   'GET': function(req, res, route) {
-    if (route === '/' || route === '/index.html') {
-      httpHelpers.serveAssets(res, path.join(__dirname + '/public/index.html'), statusCode);
-    } else if (route === '/styles.css') {
-      httpHelpers.serveAssets(res, path.join(__dirname + '/public/styles.css'), statusCode, 'text/css');
-    } else { 
-      statusCode = 404;
-      res.writeHeader(statusCode, httpHelpers.headers);
-      res.write('<h1>404!</h1>');
-      res.end();
+    if (route === '/') {
+      route = '/index.html';
     }
+
+    doesFileExist(filePaths, route, function(err, exists) {
+      console.log(exists);
+      if (!err || exists) {
+        statusCode = 200;
+        fileType = route.split('.')[1];
+        contentType = types[fileType] + '/' + fileType;
+        console.log('line 50 ', dataToSend);
+        dataToSend = path.join(__dirname, '/public' + route); // t
+        httpHelpers.serveAssets(res, dataToSend, statusCode, contentType);
+      } else {
+        statusCode = 404;
+        contentType = 'text/html';
+        dataToSend = '<h1>404!</h1>';
+        httpHelpers.serveAssets(res, dataToSend, statusCode, contentType);
+      }
+    });
+    console.log(dataToSend, route);
+
   },
   'POST': function(req, res, route) {
 

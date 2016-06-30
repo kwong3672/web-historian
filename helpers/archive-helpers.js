@@ -33,7 +33,7 @@ exports.readListOfUrls = function(cb) {
   // console.log('line 30 read URLs');
   fs.readFile(paths.list, (err, data) => {
     if (!err) {
-      cb(data.toString().split('\n'));
+      cb(data.toString().split('\n').slice(0, -1));
     } else {
       console.log(err);
     }
@@ -51,7 +51,7 @@ exports.isUrlInList = function(url, cb) {
 };
 
 exports.addUrlToList = function(url, cb) {
-
+// moved carriage return to front, causing error with extra item in array
   fs.appendFile(paths.list, url + '\n', (err) => {
     if (!err) {
       cb();
@@ -69,12 +69,19 @@ exports.isUrlArchived = function(url, cb) {
   });
 };
 
-exports.downloadUrls = function(urlArray) {
-  _.each(urlArray, (url) => {
+exports.downloadUrls = function(urlArray, cb) {
+  _.each(urlArray, (url, i) => {
     this.isUrlArchived(url, function(exists) {
       if (!exists) {
-        htmlFetcher(url, function(html) {
-          fs.writeFile(paths.archivedSites + '/' + url, html);
+        htmlFetcher(url, function(err, html) {
+          if (!err) {
+            console.log('about to write!');
+            fs.writeFile(paths.archivedSites + '/' + url, html, (err) => {
+              if (!err && i === urlArray.length - 1) {
+                cb();
+              }
+            });
+          }
         });
       }
     });

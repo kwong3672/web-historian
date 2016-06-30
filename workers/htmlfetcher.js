@@ -4,15 +4,19 @@ var http = require('http');
 exports.htmlFetcher = function(url, cb) {
   var resultsHTML = '';
   // go get URL
-  http.get('http://' + url, (res) => {
-    var data = '';
-    console.log(res.statusCode);
-    res.on('data', function(chunk) {
-      data += chunk;
-    });
-    res.on('end', function() {
-      cb(data.toString());
-    });
+  http.get('http://' + url, (err, res) => {
+    if (!err) {
+      var data = '';
+      console.log(res.statusCode);
+      res.on('data', function(chunk) {
+        data += chunk;
+      });
+      res.on('end', function() {
+        cb(err, data.toString());
+      });
+    } else {
+      cb(err);
+    }
   });
 };
 
