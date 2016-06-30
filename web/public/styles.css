@@ -1,4 +1,8 @@
 body {
   margin : 0px;
   font-family: arial, sans-serif;
+  background: url('http://www.gettyimages.pt/gi-resources/images/Homepage/Hero/PT/PT_hero_42_153645159.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
 }
+

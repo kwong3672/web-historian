@@ -12,8 +12,10 @@ var statusCode = 200;
 
 var actions = {
   'GET': function(req, res, route) {
-    if (route === '/' || route === 'index.html') {
+    if (route === '/' || route === '/index.html') {
       httpHelpers.serveAssets(res, path.join(__dirname + '/public/index.html'), statusCode);
+    } else if (route === '/styles.css') {
+      httpHelpers.serveAssets(res, path.join(__dirname + '/public/styles.css'), statusCode, 'text/css');
     } else { 
       statusCode = 404;
       res.writeHeader(statusCode, httpHelpers.headers);
@@ -22,6 +24,7 @@ var actions = {
     }
   },
   'POST': function(req, res, route) {
+
     var data = '';
     req.on('data', function(chunk) {
       data += chunk;
@@ -29,28 +32,20 @@ var actions = {
     req.on('end', function() {
       var parsedUrl = qs.parse(data);
       console.log('body of post request', parsedUrl);
-
-    // Determine if site exists in archive
       // IF exists in sites folder
+      archiveHelpers.isUrlArchived(parsedUrl.url, function(exists) {
         // serve file
-      // ELSE IF exsits in sites.text but DOESNT exist in sites folder
-        // Serve loading page
-        
-
-      //store URLs in object? 
-
-
-      // read file has an object
-
-    // ELSE 
-      // Append to sites.txt
-      fs.appendFile(archive.paths.list, parsedUrl.url + '\n', (err) => {
-        if (!err) {
-          // res.end should loading page
-          httpHelpers.serveAssets(res, path.join(__dirname + '/public/loading.html'), 302);
+        if (exists) {
+          httpHelpers.serveAssets(res, archiveHelpers.paths.archivedSites + '/' + parsedUrl.url, 200);
+        } else {
+          fs.appendFile(archive.paths.list, parsedUrl.url + '\n', (err) => {
+            if (!err) {
+              httpHelpers.serveAssets(res, path.join(__dirname + '/public/loading.html'), 302);
+            }
+          });
         }
+
       });
-      // archive.readListOfUrls();
     });
   }
 };

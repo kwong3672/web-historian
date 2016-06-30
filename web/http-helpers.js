@@ -12,7 +12,8 @@ var headers = {
 
 
 
-exports.serveAssets = function(res, asset, statusCode) {
+exports.serveAssets = function(res, asset, statusCode, contentType) {
+  headers['Content-Type'] = contentType || 'text/html';
 
   fs.readFile(asset, (err, data) => {
     if (!err) {

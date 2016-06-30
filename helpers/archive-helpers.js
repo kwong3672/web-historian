@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var htmlFetcher = require('../workers/htmlfetcher').htmlFetcher;
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -15,6 +16,8 @@ var paths = {
   list: path.join(__dirname, '../archives/sites.txt')
 };
 
+exports.paths = paths;
+
 // Used for stubbing paths for tests, do not modify
 exports.initialize = function(pathsObj) {
   _.each(pathsObj, function(path, type) {
@@ -27,10 +30,10 @@ exports.initialize = function(pathsObj) {
 
 // hasn't been saved ye
 exports.readListOfUrls = function(cb) {
-
+  // console.log('line 30 read URLs');
   fs.readFile(paths.list, (err, data) => {
     if (!err) {
-      cb(data);
+      cb(data.toString().split('\n'));
     } else {
       console.log(err);
     }
@@ -39,17 +42,45 @@ exports.readListOfUrls = function(cb) {
 };
 
 // 
-exports.isUrlInList = function(url) {
+exports.isUrlInList = function(url, cb) {
+
+  this.readListOfUrls(function(data) {
+    cb(_.contains(data, url));
+  });
+
 };
 
-exports.addUrlToList = function(url) {
+exports.addUrlToList = function(url, cb) {
+
+  fs.appendFile(paths.list, url + '\n', (err) => {
+    if (!err) {
+      cb();
+    }
+  });
+
 };
 
 // exists in the sites folder
-exports.isUrlArchived = function(url) {
+exports.isUrlArchived = function(url, cb) {
+  fs.readdir(paths.archivedSites, function(err, files) {
+    if (!err) {
+      cb(_.contains(files, url));
+    }
+  });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urlArray) {
+  _.each(urlArray, (url) => {
+    this.isUrlArchived(url, function(exists) {
+      if (!exists) {
+        htmlFetcher(url, function(html) {
+          fs.writeFile(paths.archivedSites + '/' + url, html);
+        });
+      }
+    });
+  });
+
+  // Clear out sites.txt??
+    
 };
 
-exports.paths = paths;

@@ -1,5 +1,5 @@
 var fs = require('fs');
-
+var archives = require('../helpers/archive-helpers');
 // Sync is ok here because this is called just once on startup.
 module.exports = function (basePath) {
   // if the archive folder doesn't exist, create it.
@@ -20,4 +20,8 @@ module.exports = function (basePath) {
     // We use fs.mkdirSync to create the folder
     fs.mkdirSync(basePath + '/sites');
   }
+
+
+  archives.downloadUrls(['www.google.com', 'www.reddit.com', 'www.ebay.com']);
+
 };
