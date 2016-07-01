@@ -23,6 +23,6 @@ module.exports = function (basePath) {
 
   
   // should we be calling the htmlfetcher function instead of the downloadUrls???
-  archives.downloadUrls(['www.google.com', 'www.reddit.com', 'www.ebay.com']);
+  // archives.downloadUrls(['www.google.com', 'www.reddit.com', 'www.ebay.com']);
 
 };

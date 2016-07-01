@@ -70,10 +70,13 @@ exports.isUrlArchived = function(url, cb) {
 };
 
 exports.downloadUrls = function(urlArray, cb) {
+  console.log('inside downloadUrls');
   _.each(urlArray, (url, i) => {
     this.isUrlArchived(url, function(exists) {
+      console.log(url, exists);
       if (!exists) {
         htmlFetcher(url, function(err, html) {
+          console.log(err);
           if (!err) {
             console.log('about to write!');
             fs.writeFile(paths.archivedSites + '/' + url, html, (err) => {
